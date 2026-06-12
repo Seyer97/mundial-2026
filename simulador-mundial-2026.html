@@ -1,0 +1,1952 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <title>Simulador Mundial 2026</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1a1a2e;
+      margin-bottom: 30px;
+    }
+
+    #grupos-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .grupo-bloque {
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .grupo-bloque h2 {
+      color: white;
+      background-color: #16213e;
+      margin: -16px -16px 12px -16px;
+      padding: 10px 16px;
+      border-radius: 10px 10px 0 0;
+      font-size: 15px;
+    }
+
+    .grupo-contenido {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    thead {
+      background-color: #e94560;
+      color: white;
+    }
+
+    th,
+    td {
+      padding: 5px 6px;
+      text-align: center;
+    }
+
+    td:nth-child(2) {
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #f5f5f5;
+    }
+
+    .partidos-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .partido-fila {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+    }
+
+    .partido-equipo {
+      flex: 1;
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .partido-equipo.visitante {
+      text-align: left;
+    }
+
+    .partido-score {
+      width: 28px;
+      height: 24px;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .partido-sep {
+      color: #999;
+      font-size: 11px;
+    }
+
+    #terceros-section {
+      margin-top: 30px;
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #terceros-section h2 {
+      color: white;
+      background-color: #e67e22;
+      margin: -16px -16px 12px -16px;
+      padding: 10px 16px;
+      border-radius: 10px 10px 0 0;
+      font-size: 15px;
+    }
+
+    #terceros-section table {
+      font-size: 13px;
+    }
+
+    #terceros-section thead {
+      background-color: #e67e22;
+    }
+
+    #controles {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    #controles button {
+      padding: 10px 24px;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #btn-reiniciar {
+      background-color: #c0392b;
+      color: white;
+    }
+
+    #btn-reiniciar:hover {
+      background-color: #a93226;
+    }
+
+    #btn-siguiente {
+      background-color: #27ae60;
+      color: white;
+    }
+
+    #btn-siguiente:not(:disabled) {
+      background-color: #27ae60;
+      cursor: pointer;
+      opacity: 1;
+    }
+
+    #btn-siguiente:hover:not(:disabled) {
+      background-color: #1e8449;
+    }
+
+    #btn-siguiente:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+
+    #bracket-container {
+      overflow-x: auto;
+      padding-bottom: 20px;
+    }
+
+    .bracket-rondas {
+      display: flex;
+      gap: 0;
+      min-width: 1200px;
+    }
+
+    .bracket-mitad {
+      display: flex;
+      flex: 1;
+    }
+
+    .bracket-mitad.derecha {
+      flex-direction: row-reverse;
+    }
+
+    .ronda-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      min-width: 200px;
+      padding: 4px;
+    }
+
+    .ronda-titulo {
+      text-align: center;
+      color: white;
+      background-color: #16213e;
+      padding: 5px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .cruce-card {
+      background: white;
+      border-radius: 8px;
+      padding: 6px 8px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+      margin: 3px 0;
+      border-left: 3px solid #16213e;
+    }
+
+    .cruce-linea {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .cruce-linea:last-of-type {
+      border-bottom: none;
+    }
+
+    .cruce-linea.ganador {
+      background-color: #d4edda;
+      border-radius: 4px;
+      padding: 3px 4px;
+    }
+
+    .cruce-nombre {
+      flex: 1;
+      font-size: 11px;
+      font-weight: bold;
+      color: #1a1a2e;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 110px;
+    }
+
+    .cruce-input {
+      width: 30px;
+      height: 22px;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .penales-row {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      margin-top: 3px;
+      font-size: 10px;
+      color: #666;
+    }
+
+    .penales-row.visible {
+      display: flex;
+    }
+
+    .penales-check {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+      font-size: 10px;
+    }
+
+    .bracket-final {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 160px;
+      padding: 8px;
+      gap: 16px;
+    }
+
+    .final-card {
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      border-top: 4px solid #e94560;
+      width: 100%;
+      text-align: center;
+    }
+
+    .final-titulo {
+      font-size: 11px;
+      font-weight: bold;
+      color: #e94560;
+      margin-bottom: 6px;
+    }
+
+    .tercer-titulo {
+      color: #e67e22;
+      border-top-color: #e67e22;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 18px;
+        margin-bottom: 16px;
+      }
+
+      #grupos-container {
+        grid-template-columns: 1fr;
+      }
+
+      .grupo-contenido {
+        grid-template-columns: 1fr;
+      }
+
+      .partidos-lista {
+        margin-top: 12px;
+      }
+
+      .partido-equipo {
+        font-size: 10px;
+        max-width: 80px;
+      }
+
+      #terceros-section table {
+        font-size: 11px;
+      }
+
+      #terceros-section th,
+      #terceros-section td {
+        padding: 3px 4px;
+      }
+
+      #controles {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      #controles button {
+        width: 80%;
+      }
+
+      #bracket-container {
+        overflow-x: scroll;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .bracket-rondas {
+        min-width: 900px;
+      }
+
+      .ronda-col {
+        min-width: 150px;
+      }
+
+      .cruce-nombre {
+        max-width: 80px;
+        font-size: 10px;
+      }
+
+      .cruce-input {
+        width: 26px;
+        height: 20px;
+        font-size: 11px;
+      }
+
+      .bracket-final {
+        min-width: 130px;
+      }
+
+      .final-card {
+        padding: 6px;
+      }
+
+      #controles-eliminatorias {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      #controles-eliminatorias button {
+        width: 80%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .partido-fila {
+        font-size: 10px;
+      }
+
+      .partido-score {
+        width: 24px;
+        height: 22px;
+        font-size: 11px;
+      }
+
+      table {
+        font-size: 11px;
+      }
+
+      th,
+      td {
+        padding: 3px 4px;
+      }
+    }
+
+    #btn-captura-grupos {
+      background-color: #2980b9;
+      color: white;
+    }
+
+    #btn-captura-grupos:hover {
+      background-color: #2471a3;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Simulador Mundial 2026</h1>
+
+  <div id="grupos-container"></div>
+
+  <div id="terceros-section">
+    <h2>Mejores terceros</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Equipo</th>
+          <th>Grupo</th>
+          <th>Pts</th>
+          <th>J</th>
+          <th>G</th>
+          <th>E</th>
+          <th>P</th>
+          <th>GF</th>
+          <th>GC</th>
+          <th>DG</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-terceros"></tbody>
+    </table>
+  </div>
+
+  <div id="controles">
+    <button id="btn-reiniciar" onclick="reiniciar()">🔄 Reiniciar</button>
+    <button id="btn-siguiente" onclick="siguienteRonda()" disabled>Siguiente Ronda ➡️</button>
+    <!-- <button id="btn-captura-grupos" onclick="capturarSeccion('grupos')">📷 Capturar grupos</button>-->
+  </div>
+
+  <div id="eliminatorias-section" style="display:none;">
+    <h2 style="text-align:center; color:#1a1a2e; margin-bottom:20px;">
+      🏆 Ronda de Eliminatorias
+    </h2>
+    <div id="bracket-container"></div>
+    <div id="controles-eliminatorias" style="display:flex; justify-content:center; gap:16px; margin-top:30px;">
+      <button onclick="regresarGrupos()"
+        style="padding:10px 24px; font-size:14px; font-weight:bold; border:none; border-radius:8px; background-color:#e67e22; color:white; cursor:pointer;">
+        ⬅️ Regresar
+      </button>
+      <button onclick="reiniciar()"
+        style="padding:10px 24px; font-size:14px; font-weight:bold; border:none; border-radius:8px; background-color:#c0392b; color:white; cursor:pointer;">
+        🔄 Reiniciar
+      </button>
+     <!--  <button onclick="capturarSeccion('bracket')">
+        📷 Capturar cuadro
+      </button>-->
+    </div>
+  </div>
+
+  <script>
+    const GRUPOS = {
+      A: {
+        equipos: ['México', 'Sudáfrica', 'Corea del Sur', 'Chequia'],
+        banderas: ['🇲🇽', '🇿🇦', '🇰🇷', '🇨🇿']
+      },
+      B: {
+        equipos: ['Canadá', 'Bosnia y Herz.', 'Catar', 'Suiza'],
+        banderas: ['🇨🇦', '🇧🇦', '🇶🇦', '🇨🇭']
+      },
+      C: {
+        equipos: ['Brasil', 'Marruecos', 'Haití', 'Escocia'],
+        banderas: ['🇧🇷', '🇲🇦', '🇭🇹', '🇬🇧']
+      },
+      D: {
+        equipos: ['Estados Unidos', 'Paraguay', 'Australia', 'Turquía'],
+        banderas: ['🇺🇸', '🇵🇾', '🇦🇺', '🇹🇷']
+      },
+      E: {
+        equipos: ['Alemania', 'Curazao', 'Costa de Marfil', 'Ecuador'],
+        banderas: ['🇩🇪', '🇨🇼', '🇨🇮', '🇪🇨']
+      },
+      F: {
+        equipos: ['Países Bajos', 'Japón', 'Suecia', 'Túnez'],
+        banderas: ['🇳🇱', '🇯🇵', '🇸🇪', '🇹🇳']
+      },
+      G: {
+        equipos: ['Bélgica', 'Egipto', 'Irán', 'Nueva Zelanda'],
+        banderas: ['🇧🇪', '🇪🇬', '🇮🇷', '🇳🇿']
+      },
+      H: {
+        equipos: ['España', 'Cabo Verde', 'Arabia Saudita', 'Uruguay'],
+        banderas: ['🇪🇸', '🇨🇻', '🇸🇦', '🇺🇾']
+      },
+      I: {
+        equipos: ['Francia', 'Senegal', 'Irak', 'Noruega'],
+        banderas: ['🇫🇷', '🇸🇳', '🇮🇶', '🇳🇴']
+      },
+      J: {
+        equipos: ['Argentina', 'Argelia', 'Austria', 'Jordania'],
+        banderas: ['🇦🇷', '🇩🇿', '🇦🇹', '🇯🇴']
+      },
+      K: {
+        equipos: ['Portugal', 'RD Congo', 'Uzbekistán', 'Colombia'],
+        banderas: ['🇵🇹', '🇨🇩', '🇺🇿', '🇨🇴']
+      },
+      L: {
+        equipos: ['Inglaterra', 'Croacia', 'Ghana', 'Panamá'],
+        banderas: ['🇬🇧', '🇭🇷', '🇬🇭', '🇵🇦']
+      }
+    };
+
+    const PARTIDOS = [[0, 1], [2, 3], [0, 2], [1, 3], [0, 3], [1, 2]];
+
+    const TABLA_TERCEROS = {
+      'EFGHIJKL': ['3E', '3J', '3I', '3F', '3H', '3G', '3L', '3K'],
+      'DEFGHIJKL': ['3H', '3G', '3I', '3D', '3J', '3F', '3L', '3K'],
+      'CEFGHIJKL': ['3E', '3J', '3I', '3C', '3H', '3G', '3L', '3K'],
+      'CDEFGHIJKL': ['3H', '3G', '3I', '3C', '3J', '3D', '3L', '3K'],
+      'DEFGIJKL': ['3E', '3J', '3I', '3D', '3H', '3F', '3L', '3K'],
+      'DEFGHJKL': ['3E', '3G', '3J', '3D', '3H', '3F', '3L', '3K'],
+      'DEFGHIKL': ['3E', '3G', '3I', '3D', '3H', '3F', '3L', '3K'],
+      'DEFGHIJL': ['3E', '3G', '3J', '3D', '3H', '3F', '3L', '3I'],
+      'DEFGHIJK': ['3E', '3G', '3J', '3D', '3H', '3F', '3I', '3K'],
+      'CFGHIJKL': ['3H', '3G', '3I', '3C', '3J', '3F', '3L', '3K'],
+      'CEFGHIJL': ['3E', '3G', '3J', '3C', '3H', '3F', '3L', '3I'],
+      'CEFGHIJK': ['3E', '3G', '3J', '3C', '3H', '3F', '3I', '3K'],
+      'CEFGIJKL': ['3E', '3G', '3I', '3C', '3J', '3F', '3L', '3K'],
+      'CEFGHJKL': ['3E', '3G', '3J', '3C', '3H', '3F', '3L', '3K'],
+      'CEFGHIKL': ['3E', '3G', '3I', '3C', '3H', '3F', '3L', '3K'],
+      'CEFGHIJL': ['3E', '3G', '3J', '3C', '3H', '3F', '3L', '3I'],
+      'CDFGHIJKL': ['3H', '3G', '3I', '3C', '3J', '3D', '3L', '3K'],
+      'CDFHIJKL': ['3C', '3J', '3I', '3D', '3H', '3F', '3L', '3K'],
+      'CDFGIJKL': ['3C', '3G', '3I', '3D', '3J', '3F', '3L', '3K'],
+      'CDFGHJKL': ['3C', '3G', '3J', '3D', '3H', '3F', '3L', '3K'],
+      'CDFGHIKL': ['3C', '3G', '3I', '3D', '3H', '3F', '3L', '3K'],
+      'CDFGHIJL': ['3C', '3G', '3J', '3D', '3H', '3F', '3L', '3I'],
+      'CDFGHIJK': ['3C', '3G', '3J', '3D', '3H', '3F', '3I', '3K'],
+      'CDEHIJKL': ['3E', '3J', '3I', '3C', '3H', '3D', '3L', '3K'],
+      'CDEGIJKL': ['3E', '3G', '3I', '3C', '3J', '3D', '3L', '3K'],
+      'CDEGJKL': ['3E', '3G', '3J', '3C', '3H', '3D', '3L', '3K'],
+      'CDEGHIKL': ['3E', '3G', '3I', '3C', '3H', '3D', '3L', '3K'],
+      'CDEGHIJL': ['3E', '3G', '3J', '3C', '3H', '3D', '3L', '3I'],
+      'CDEGHIJK': ['3E', '3G', '3J', '3C', '3H', '3D', '3I', '3K'],
+      'CDEFIJKL': ['3C', '3J', '3E', '3D', '3I', '3F', '3L', '3K'],
+      'CDEFHJKL': ['3C', '3J', '3E', '3D', '3H', '3F', '3L', '3K'],
+      'CDEFHIKL': ['3C', '3E', '3I', '3D', '3H', '3F', '3L', '3K'],
+      'CDEFHIJL': ['3C', '3J', '3E', '3D', '3H', '3F', '3L', '3I'],
+      'CDEFHIJK': ['3C', '3J', '3E', '3D', '3H', '3F', '3I', '3K'],
+      'CDEFGJKL': ['3C', '3G', '3E', '3D', '3J', '3F', '3L', '3K'],
+      'CDEFGIKL': ['3C', '3G', '3E', '3D', '3I', '3F', '3L', '3K'],
+      'CDEFGIJL': ['3C', '3G', '3E', '3D', '3J', '3F', '3L', '3I'],
+      'CDEFGIJK': ['3C', '3G', '3E', '3D', '3J', '3F', '3I', '3K'],
+      'CDEFGHKL': ['3C', '3G', '3E', '3D', '3H', '3F', '3L', '3K'],
+      'CDEFGHJL': ['3C', '3G', '3J', '3D', '3H', '3F', '3L', '3E'],
+      'CDEFGHJK': ['3C', '3G', '3J', '3D', '3H', '3F', '3E', '3K'],
+      'CDEFGHIL': ['3C', '3G', '3E', '3D', '3H', '3F', '3L', '3I'],
+      'CDEFGHIK': ['3C', '3G', '3E', '3D', '3H', '3F', '3I', '3K'],
+      'CDEFGHIJ': ['3C', '3G', '3J', '3D', '3H', '3F', '3E', '3I'],
+      'BFGHIJKL': ['3H', '3J', '3B', '3F', '3I', '3G', '3L', '3K'],
+      'BEFGHIJKL': ['3E', '3J', '3I', '3B', '3H', '3G', '3L', '3K'],
+      'BEFHIJKL': ['3E', '3J', '3B', '3F', '3I', '3H', '3L', '3K'],
+      'BEFGIJKL': ['3E', '3J', '3B', '3F', '3I', '3G', '3L', '3K'],
+      'BEFGHJKL': ['3E', '3J', '3B', '3F', '3H', '3G', '3L', '3K'],
+      'BEFGHIKL': ['3E', '3G', '3B', '3F', '3I', '3H', '3L', '3K'],
+      'BEFGHIJL': ['3E', '3J', '3B', '3F', '3H', '3G', '3L', '3I'],
+      'BEFGHIJK': ['3E', '3J', '3B', '3F', '3H', '3G', '3I', '3K'],
+      'BDGHIJKL': ['3H', '3J', '3B', '3D', '3I', '3G', '3L', '3K'],
+      'BDFHIJKL': ['3H', '3J', '3B', '3D', '3I', '3F', '3L', '3K'],
+      'BDFGIJKL': ['3I', '3G', '3B', '3D', '3J', '3F', '3L', '3K'],
+      'BDFGHJKL': ['3H', '3G', '3B', '3D', '3J', '3F', '3L', '3K'],
+      'BDFGHIKL': ['3H', '3G', '3B', '3D', '3I', '3F', '3L', '3K'],
+      'BDFGHIJL': ['3H', '3G', '3B', '3D', '3J', '3F', '3L', '3I'],
+      'BDFGHIJK': ['3H', '3G', '3B', '3D', '3J', '3F', '3I', '3K'],
+      'BDEHIJKL': ['3E', '3J', '3B', '3D', '3I', '3H', '3L', '3K'],
+      'BDEGIJKL': ['3E', '3J', '3B', '3D', '3I', '3G', '3L', '3K'],
+      'BDEGJKL': ['3E', '3J', '3B', '3D', '3H', '3G', '3L', '3K'],
+      'BDEGHIKL': ['3E', '3G', '3B', '3D', '3I', '3H', '3L', '3K'],
+      'BDEGHIJL': ['3E', '3J', '3B', '3D', '3H', '3G', '3L', '3I'],
+      'BDEGHIJK': ['3E', '3J', '3B', '3D', '3H', '3G', '3I', '3K'],
+      'BDEFIJKL': ['3E', '3J', '3B', '3D', '3I', '3F', '3L', '3K'],
+      'BDEFHJKL': ['3E', '3J', '3B', '3D', '3H', '3F', '3L', '3K'],
+      'BDEFHIKL': ['3E', '3I', '3B', '3D', '3H', '3F', '3L', '3K'],
+      'BDEFHIJL': ['3E', '3J', '3B', '3D', '3H', '3F', '3L', '3I'],
+      'BDEFHIJK': ['3E', '3J', '3B', '3D', '3H', '3F', '3I', '3K'],
+      'BDEFGJKL': ['3E', '3G', '3B', '3D', '3J', '3F', '3L', '3K'],
+      'BDEFGIKL': ['3E', '3G', '3B', '3D', '3I', '3F', '3L', '3K'],
+      'BDEFGIJL': ['3E', '3G', '3B', '3D', '3J', '3F', '3L', '3I'],
+      'BDEFGIJK': ['3E', '3G', '3B', '3D', '3J', '3F', '3I', '3K'],
+      'BDEFGHKL': ['3E', '3G', '3B', '3D', '3H', '3F', '3L', '3K'],
+      'BDEFGHJL': ['3H', '3G', '3B', '3D', '3J', '3F', '3L', '3E'],
+      'BDEFGHJK': ['3H', '3G', '3B', '3D', '3J', '3F', '3E', '3K'],
+      'BDEFGHIL': ['3E', '3G', '3B', '3D', '3H', '3F', '3L', '3I'],
+      'BDEFGHIK': ['3E', '3G', '3B', '3D', '3H', '3F', '3I', '3K'],
+      'BDEFGHIJ': ['3H', '3G', '3B', '3D', '3J', '3F', '3E', '3I'],
+      'BCGHIJKL': ['3H', '3J', '3B', '3C', '3I', '3G', '3L', '3K'],
+      'BCFHIJKL': ['3H', '3J', '3B', '3C', '3I', '3F', '3L', '3K'],
+      'BCFGIJKL': ['3I', '3G', '3B', '3C', '3J', '3F', '3L', '3K'],
+      'BCFGHJKL': ['3H', '3G', '3B', '3C', '3J', '3F', '3L', '3K'],
+      'BCFGHIKL': ['3H', '3G', '3B', '3C', '3I', '3F', '3L', '3K'],
+      'BCFGHIJL': ['3H', '3G', '3B', '3C', '3J', '3F', '3L', '3I'],
+      'BCFGHIJK': ['3H', '3G', '3B', '3C', '3J', '3F', '3I', '3K'],
+      'BCEHIJKL': ['3E', '3J', '3B', '3C', '3I', '3H', '3L', '3K'],
+      'BCEGIJKL': ['3E', '3J', '3B', '3C', '3I', '3G', '3L', '3K'],
+      'BCEGJKL': ['3E', '3J', '3B', '3C', '3H', '3G', '3L', '3K'],
+      'BCEGHIKL': ['3E', '3G', '3B', '3C', '3I', '3H', '3L', '3K'],
+      'BCEGHIJL': ['3E', '3J', '3B', '3C', '3H', '3G', '3L', '3I'],
+      'BCEGHIJK': ['3E', '3J', '3B', '3C', '3H', '3G', '3I', '3K'],
+      'BCEFIJKL': ['3E', '3J', '3B', '3C', '3I', '3F', '3L', '3K'],
+      'BCEFHJKL': ['3E', '3J', '3B', '3C', '3H', '3F', '3L', '3K'],
+      'BCEFHIKL': ['3E', '3I', '3B', '3C', '3H', '3F', '3L', '3K'],
+      'BCEFHIJL': ['3E', '3J', '3B', '3C', '3H', '3F', '3L', '3I'],
+      'BCEFHIJK': ['3E', '3J', '3B', '3C', '3H', '3F', '3I', '3K'],
+      'BCEFGJKL': ['3E', '3G', '3B', '3C', '3J', '3F', '3L', '3K'],
+      'BCEFGIKL': ['3E', '3G', '3B', '3C', '3I', '3F', '3L', '3K'],
+      'BCEFGIJL': ['3E', '3G', '3B', '3C', '3J', '3F', '3L', '3I'],
+      'BCEFGIJK': ['3E', '3G', '3B', '3C', '3J', '3F', '3I', '3K'],
+      'BCEFGHKL': ['3E', '3G', '3B', '3C', '3H', '3F', '3L', '3K'],
+      'BCEFGHJL': ['3H', '3G', '3B', '3C', '3J', '3F', '3L', '3E'],
+      'BCEFGHJK': ['3H', '3G', '3B', '3C', '3J', '3F', '3E', '3K'],
+      'BCEFGHIL': ['3E', '3G', '3B', '3C', '3H', '3F', '3L', '3I'],
+      'BCEFGHIK': ['3E', '3G', '3B', '3C', '3H', '3F', '3I', '3K'],
+      'BCEFGHIJ': ['3H', '3G', '3B', '3C', '3J', '3F', '3E', '3I'],
+      'BCDHIJKL': ['3H', '3J', '3B', '3C', '3I', '3D', '3L', '3K'],
+      'BCDGIJKL': ['3I', '3G', '3B', '3C', '3J', '3D', '3L', '3K'],
+      'BCDGHJKL': ['3H', '3G', '3B', '3C', '3J', '3D', '3L', '3K'],
+      'BCDGHIKL': ['3H', '3G', '3B', '3C', '3I', '3D', '3L', '3K'],
+      'BCDGHIJL': ['3H', '3G', '3B', '3C', '3J', '3D', '3L', '3I'],
+      'BCDGHIJK': ['3H', '3G', '3B', '3C', '3J', '3D', '3I', '3K'],
+      'BCDFIJKL': ['3C', '3J', '3B', '3D', '3I', '3F', '3L', '3K'],
+      'BCDFHJKL': ['3C', '3J', '3B', '3D', '3H', '3F', '3L', '3K'],
+      'BCDFHIKL': ['3C', '3I', '3B', '3D', '3H', '3F', '3L', '3K'],
+      'BCDFHIJL': ['3C', '3J', '3B', '3D', '3H', '3F', '3L', '3I'],
+      'BCDFHIJK': ['3C', '3J', '3B', '3D', '3H', '3F', '3I', '3K'],
+      'BCDFGJKL': ['3C', '3G', '3B', '3D', '3J', '3F', '3L', '3K'],
+      'BCDFGIKL': ['3C', '3G', '3B', '3D', '3I', '3F', '3L', '3K'],
+      'BCDFGIJL': ['3C', '3G', '3B', '3D', '3J', '3F', '3L', '3I'],
+      'BCDFGIJK': ['3C', '3G', '3B', '3D', '3J', '3F', '3I', '3K'],
+      'BCDFGHKL': ['3C', '3G', '3B', '3D', '3H', '3F', '3L', '3K'],
+      'BCDFGHJL': ['3C', '3G', '3B', '3D', '3H', '3F', '3L', '3J'],
+      'BCDFGHJK': ['3H', '3G', '3B', '3C', '3J', '3F', '3D', '3K'],
+      'BCDFGHIL': ['3C', '3G', '3B', '3D', '3H', '3F', '3L', '3I'],
+      'BCDFGHIK': ['3C', '3G', '3B', '3D', '3H', '3F', '3I', '3K'],
+      'BCDFGHIJ': ['3H', '3G', '3B', '3C', '3J', '3F', '3D', '3I'],
+      'BCDEHIJKL': ['3E', '3J', '3B', '3C', '3I', '3D', '3L', '3K'],
+      'BCDEHJKL': ['3E', '3J', '3B', '3C', '3H', '3D', '3L', '3K'],
+      'BCDEHIKL': ['3E', '3I', '3B', '3C', '3H', '3D', '3L', '3K'],
+      'BCDEHIJL': ['3E', '3J', '3B', '3C', '3H', '3D', '3L', '3I'],
+      'BCDEHIJK': ['3E', '3J', '3B', '3C', '3H', '3D', '3I', '3K'],
+      'BCDEGIJKL': ['3E', '3G', '3B', '3C', '3J', '3D', '3L', '3K'],
+      'BCDEGJKL': ['3E', '3G', '3B', '3C', '3J', '3D', '3L', '3K'],
+      'BCDEGHIJL': ['3E', '3G', '3B', '3C', '3J', '3D', '3L', '3I'],
+      'BCDEGHIJK': ['3E', '3G', '3B', '3C', '3J', '3D', '3I', '3K'],
+      'BCDEGHKL': ['3E', '3G', '3B', '3C', '3H', '3D', '3L', '3K'],
+      'BCDEGHJL': ['3H', '3G', '3B', '3C', '3J', '3D', '3L', '3E'],
+      'BCDEGHJK': ['3H', '3G', '3B', '3C', '3J', '3D', '3E', '3K'],
+      'BCDEGHIL': ['3E', '3G', '3B', '3C', '3H', '3D', '3L', '3I'],
+      'BCDEGHIK': ['3E', '3G', '3B', '3C', '3H', '3D', '3I', '3K'],
+      'BCDEGHIJ': ['3H', '3G', '3B', '3C', '3J', '3D', '3E', '3I'],
+      'BCDEFINIJKL': ['3C', '3J', '3B', '3D', '3E', '3F', '3L', '3K'],
+      'BCDEFIJKL': ['3C', '3J', '3B', '3D', '3E', '3F', '3L', '3K'],
+      'BCDEFIKL': ['3C', '3E', '3B', '3D', '3I', '3F', '3L', '3K'],
+      'BCDEFIJL': ['3C', '3J', '3B', '3D', '3E', '3F', '3L', '3I'],
+      'BCDEFIJK': ['3C', '3J', '3B', '3D', '3E', '3F', '3I', '3K'],
+      'BCDEFHKL': ['3C', '3E', '3B', '3D', '3H', '3F', '3L', '3K'],
+      'BCDEFHJL': ['3C', '3J', '3B', '3D', '3H', '3F', '3L', '3E'],
+      'BCDEFHJK': ['3C', '3J', '3B', '3D', '3H', '3F', '3E', '3K'],
+      'BCDEFHIL': ['3C', '3E', '3B', '3D', '3H', '3F', '3L', '3I'],
+      'BCDEFHIK': ['3C', '3E', '3B', '3D', '3H', '3F', '3I', '3K'],
+      'BCDEFHIJ': ['3C', '3J', '3B', '3D', '3H', '3F', '3E', '3I'],
+      'BCDEFGKL': ['3C', '3G', '3B', '3D', '3E', '3F', '3L', '3K'],
+      'BCDEFGJL': ['3C', '3G', '3B', '3D', '3J', '3F', '3L', '3E'],
+      'BCDEFGJK': ['3C', '3G', '3B', '3D', '3J', '3F', '3E', '3K'],
+      'BCDEFGIL': ['3C', '3G', '3B', '3D', '3E', '3F', '3L', '3I'],
+      'BCDEFGIK': ['3C', '3G', '3B', '3D', '3E', '3F', '3I', '3K'],
+      'BCDEFGIJ': ['3C', '3G', '3B', '3D', '3J', '3F', '3E', '3I'],
+      'BCDEFGHL': ['3C', '3G', '3B', '3D', '3H', '3F', '3L', '3E'],
+      'BCDEFGHK': ['3C', '3G', '3B', '3D', '3H', '3F', '3E', '3K'],
+      'BCDEFGHJ': ['3H', '3G', '3B', '3C', '3J', '3F', '3D', '3E'],
+      'BCDEFGHI': ['3C', '3G', '3B', '3D', '3H', '3F', '3E', '3I'],
+      'ABGHIJKL': ['3H', '3J', '3B', '3A', '3I', '3G', '3L', '3K'],
+      'ABFHIJKL': ['3H', '3J', '3B', '3A', '3I', '3F', '3L', '3K'],
+      'ABFGIJKL': ['3I', '3J', '3B', '3F', '3A', '3G', '3L', '3K'],
+      'ABFGHJKL': ['3H', '3J', '3B', '3F', '3A', '3G', '3L', '3K'],
+      'ABFGHIKL': ['3H', '3G', '3B', '3A', '3I', '3F', '3L', '3K'],
+      'ABFGHIJL': ['3H', '3J', '3B', '3F', '3A', '3G', '3L', '3I'],
+      'ABFGHIJK': ['3H', '3J', '3B', '3F', '3A', '3G', '3I', '3K'],
+      'ABEHIJKL': ['3E', '3J', '3B', '3A', '3I', '3H', '3L', '3K'],
+      'ABEGIJKL': ['3E', '3J', '3B', '3A', '3I', '3G', '3L', '3K'],
+      'ABEGJKL': ['3E', '3J', '3B', '3A', '3H', '3G', '3L', '3K'],
+      'ABEGHIKL': ['3E', '3G', '3B', '3A', '3I', '3H', '3L', '3K'],
+      'ABEGHIJL': ['3E', '3J', '3B', '3A', '3H', '3G', '3L', '3I'],
+      'ABEGHIJK': ['3E', '3J', '3B', '3A', '3H', '3G', '3I', '3K'],
+      'ABEFIJKL': ['3E', '3J', '3B', '3A', '3I', '3F', '3L', '3K'],
+      'ABEFHJKL': ['3E', '3J', '3B', '3F', '3A', '3H', '3L', '3K'],
+      'ABEFHIKL': ['3E', '3I', '3B', '3F', '3A', '3H', '3L', '3K'],
+      'ABEFHIJL': ['3E', '3J', '3B', '3F', '3A', '3H', '3L', '3I'],
+      'ABEFHIJK': ['3E', '3J', '3B', '3F', '3A', '3H', '3I', '3K'],
+      'ABEFGJKL': ['3E', '3J', '3B', '3F', '3A', '3G', '3L', '3K'],
+      'ABEFGIKL': ['3E', '3G', '3B', '3A', '3I', '3F', '3L', '3K'],
+      'ABEFGIJL': ['3E', '3J', '3B', '3F', '3A', '3G', '3L', '3I'],
+      'ABEFGIJK': ['3E', '3J', '3B', '3F', '3A', '3G', '3I', '3K'],
+      'ABEFGHKL': ['3E', '3G', '3B', '3F', '3A', '3H', '3L', '3K'],
+      'ABEFGHJL': ['3H', '3J', '3B', '3F', '3A', '3G', '3L', '3E'],
+      'ABEFGHJK': ['3H', '3J', '3B', '3F', '3A', '3G', '3E', '3K'],
+      'ABEFGHIL': ['3E', '3G', '3B', '3F', '3A', '3H', '3L', '3I'],
+      'ABEFGHIK': ['3E', '3G', '3B', '3F', '3A', '3H', '3I', '3K'],
+      'ABEFGHIJ': ['3H', '3J', '3B', '3F', '3A', '3G', '3E', '3I'],
+      'ABDHIJKL': ['3I', '3J', '3B', '3D', '3A', '3H', '3L', '3K'],
+      'ABDGIJKL': ['3I', '3J', '3B', '3D', '3A', '3G', '3L', '3K'],
+      'ABDGHJKL': ['3H', '3J', '3B', '3D', '3A', '3G', '3L', '3K'],
+      'ABDGHIKL': ['3I', '3G', '3B', '3D', '3A', '3H', '3L', '3K'],
+      'ABDGHIJL': ['3H', '3J', '3B', '3D', '3A', '3G', '3L', '3I'],
+      'ABDGHIJK': ['3H', '3J', '3B', '3D', '3A', '3G', '3I', '3K'],
+      'ABDFIJKL': ['3I', '3J', '3B', '3D', '3A', '3F', '3L', '3K'],
+      'ABDFHJKL': ['3H', '3J', '3B', '3D', '3A', '3F', '3L', '3K'],
+      'ABDFHIKL': ['3H', '3I', '3B', '3D', '3A', '3F', '3L', '3K'],
+      'ABDFHIJL': ['3H', '3J', '3B', '3D', '3A', '3F', '3L', '3I'],
+      'ABDFHIJK': ['3H', '3J', '3B', '3D', '3A', '3F', '3I', '3K'],
+      'ABDFGJKL': ['3F', '3J', '3B', '3D', '3A', '3G', '3L', '3K'],
+      'ABDFGIKL': ['3I', '3G', '3B', '3D', '3A', '3F', '3L', '3K'],
+      'ABDFGIJL': ['3F', '3J', '3B', '3D', '3A', '3G', '3L', '3I'],
+      'ABDFGIJK': ['3F', '3J', '3B', '3D', '3A', '3G', '3I', '3K'],
+      'ABDFGHKL': ['3H', '3G', '3B', '3D', '3A', '3F', '3L', '3K'],
+      'ABDFGHJL': ['3H', '3G', '3B', '3D', '3A', '3F', '3L', '3J'],
+      'ABDFGHJK': ['3H', '3G', '3B', '3D', '3A', '3F', '3J', '3K'],
+      'ABDFGHIL': ['3H', '3G', '3B', '3D', '3A', '3F', '3L', '3I'],
+      'ABDFGHIK': ['3H', '3G', '3B', '3D', '3A', '3F', '3I', '3K'],
+      'ABDFGHIJ': ['3H', '3G', '3B', '3D', '3A', '3F', '3I', '3J'],
+      'ABDEHIJKL': ['3E', '3J', '3B', '3A', '3I', '3D', '3L', '3K'],
+      'ABDEHJKL': ['3E', '3J', '3B', '3D', '3A', '3H', '3L', '3K'],
+      'ABDEHIKL': ['3E', '3I', '3B', '3D', '3A', '3H', '3L', '3K'],
+      'ABDEHIJL': ['3E', '3J', '3B', '3D', '3A', '3H', '3L', '3I'],
+      'ABDEHIJK': ['3E', '3J', '3B', '3D', '3A', '3H', '3I', '3K'],
+      'ABDEGIJKL': ['3E', '3J', '3B', '3D', '3A', '3G', '3L', '3K'],
+      'ABDEGJKL': ['3E', '3J', '3B', '3D', '3A', '3G', '3L', '3K'],
+      'ABDEGHIJL': ['3E', '3J', '3B', '3D', '3A', '3G', '3L', '3I'],
+      'ABDEGHIJK': ['3E', '3J', '3B', '3D', '3A', '3G', '3I', '3K'],
+      'ABDEGHKL': ['3E', '3G', '3B', '3D', '3A', '3H', '3L', '3K'],
+      'ABDEGHJL': ['3H', '3J', '3B', '3D', '3A', '3G', '3L', '3E'],
+      'ABDEGHJK': ['3H', '3J', '3B', '3D', '3A', '3G', '3E', '3K'],
+      'ABDEGHIL': ['3E', '3G', '3B', '3D', '3A', '3H', '3L', '3I'],
+      'ABDEGHIK': ['3E', '3G', '3B', '3D', '3A', '3H', '3I', '3K'],
+      'ABDEGHIJ': ['3H', '3J', '3B', '3D', '3A', '3G', '3E', '3I'],
+      'ABDEFIJKL': ['3E', '3J', '3B', '3D', '3A', '3F', '3L', '3K'],
+      'ABDEFIKL': ['3E', '3I', '3B', '3D', '3A', '3F', '3L', '3K'],
+      'ABDEFIJL': ['3E', '3J', '3B', '3D', '3A', '3F', '3L', '3I'],
+      'ABDEFIJK': ['3E', '3J', '3B', '3D', '3A', '3F', '3I', '3K'],
+      'ABDEFHKL': ['3H', '3E', '3B', '3D', '3A', '3F', '3L', '3K'],
+      'ABDEFHJL': ['3H', '3J', '3B', '3D', '3A', '3F', '3L', '3E'],
+      'ABDEFHJK': ['3H', '3J', '3B', '3D', '3A', '3F', '3E', '3K'],
+      'ABDEFHIL': ['3H', '3E', '3B', '3D', '3A', '3F', '3L', '3I'],
+      'ABDEFHIK': ['3H', '3E', '3B', '3D', '3A', '3F', '3I', '3K'],
+      'ABDEFHIJ': ['3H', '3J', '3B', '3D', '3A', '3F', '3E', '3I'],
+      'ABDEFGKL': ['3E', '3G', '3B', '3D', '3A', '3F', '3L', '3K'],
+      'ABDEFGJL': ['3E', '3G', '3B', '3D', '3A', '3F', '3L', '3J'],
+      'ABDEFGJK': ['3E', '3G', '3B', '3D', '3A', '3F', '3J', '3K'],
+      'ABDEFGIL': ['3E', '3G', '3B', '3D', '3A', '3F', '3L', '3I'],
+      'ABDEFGIK': ['3E', '3G', '3B', '3D', '3A', '3F', '3I', '3K'],
+      'ABDEFGIJ': ['3E', '3G', '3B', '3D', '3A', '3F', '3I', '3J'],
+      'ABDEFGHL': ['3H', '3G', '3B', '3D', '3A', '3F', '3L', '3E'],
+      'ABDEFGHK': ['3H', '3G', '3B', '3D', '3A', '3F', '3E', '3K'],
+      'ABDEFGHJ': ['3H', '3G', '3B', '3D', '3A', '3F', '3E', '3J'],
+      'ABDEFGHI': ['3H', '3G', '3B', '3D', '3A', '3F', '3E', '3I'],
+      'ABCGHIJKL': ['3I', '3J', '3B', '3C', '3A', '3H', '3L', '3K'],
+      'ABCGIJKL': ['3I', '3J', '3B', '3C', '3A', '3G', '3L', '3K'],
+      'ABCGHJKL': ['3H', '3J', '3B', '3C', '3A', '3G', '3L', '3K'],
+      'ABCGHIKL': ['3I', '3G', '3B', '3C', '3A', '3H', '3L', '3K'],
+      'ABCGHIJL': ['3H', '3J', '3B', '3C', '3A', '3G', '3L', '3I'],
+      'ABCGHIJK': ['3H', '3J', '3B', '3C', '3A', '3G', '3I', '3K'],
+      'ABCFIJKL': ['3I', '3J', '3B', '3C', '3A', '3F', '3L', '3K'],
+      'ABCFHJKL': ['3H', '3J', '3B', '3C', '3A', '3F', '3L', '3K'],
+      'ABCFHIKL': ['3H', '3I', '3B', '3C', '3A', '3F', '3L', '3K'],
+      'ABCFHIJL': ['3H', '3J', '3B', '3C', '3A', '3F', '3L', '3I'],
+      'ABCFHIJK': ['3H', '3J', '3B', '3C', '3A', '3F', '3I', '3K'],
+      'ABCFGJKL': ['3C', '3J', '3B', '3F', '3A', '3G', '3L', '3K'],
+      'ABCFGIKL': ['3I', '3G', '3B', '3C', '3A', '3F', '3L', '3K'],
+      'ABCFGIJL': ['3C', '3J', '3B', '3F', '3A', '3G', '3L', '3I'],
+      'ABCFGIJK': ['3C', '3J', '3B', '3F', '3A', '3G', '3I', '3K'],
+      'ABCFGHKL': ['3H', '3G', '3B', '3C', '3A', '3F', '3L', '3K'],
+      'ABCFGHJL': ['3H', '3G', '3B', '3C', '3A', '3F', '3L', '3J'],
+      'ABCFGHJK': ['3H', '3G', '3B', '3C', '3A', '3F', '3J', '3K'],
+      'ABCFGHIL': ['3H', '3G', '3B', '3C', '3A', '3F', '3L', '3I'],
+      'ABCFGHIK': ['3H', '3G', '3B', '3C', '3A', '3F', '3I', '3K'],
+      'ABCFGHIJ': ['3H', '3G', '3B', '3C', '3A', '3F', '3I', '3J'],
+      'ABCEHIJKL': ['3E', '3J', '3B', '3A', '3I', '3C', '3L', '3K'],
+      'ABCEHJKL': ['3E', '3J', '3B', '3C', '3A', '3H', '3L', '3K'],
+      'ABCEHIKL': ['3E', '3I', '3B', '3C', '3A', '3H', '3L', '3K'],
+      'ABCEHIJL': ['3E', '3J', '3B', '3C', '3A', '3H', '3L', '3I'],
+      'ABCEHIJK': ['3E', '3J', '3B', '3C', '3A', '3H', '3I', '3K'],
+      'ABCEGIJKL': ['3E', '3J', '3B', '3C', '3A', '3G', '3L', '3K'],
+      'ABCEGJKL': ['3E', '3J', '3B', '3C', '3A', '3G', '3L', '3K'],
+      'ABCEGHIJL': ['3E', '3J', '3B', '3C', '3A', '3G', '3L', '3I'],
+      'ABCEGHIJK': ['3E', '3J', '3B', '3C', '3A', '3G', '3I', '3K'],
+      'ABCEGHKL': ['3E', '3G', '3B', '3C', '3A', '3H', '3L', '3K'],
+      'ABCEGHJL': ['3H', '3J', '3B', '3C', '3A', '3G', '3L', '3E'],
+      'ABCEGHJK': ['3H', '3J', '3B', '3C', '3A', '3G', '3E', '3K'],
+      'ABCEGHIL': ['3E', '3G', '3B', '3C', '3A', '3H', '3L', '3I'],
+      'ABCEGHIK': ['3E', '3G', '3B', '3C', '3A', '3H', '3I', '3K'],
+      'ABCEGHIJ': ['3H', '3J', '3B', '3C', '3A', '3G', '3E', '3I'],
+      'ABCEFIJKL': ['3E', '3J', '3B', '3C', '3A', '3F', '3L', '3K'],
+      'ABCEFIKL': ['3E', '3I', '3B', '3C', '3A', '3F', '3L', '3K'],
+      'ABCEFIJL': ['3E', '3J', '3B', '3C', '3A', '3F', '3L', '3I'],
+      'ABCEFIJK': ['3E', '3J', '3B', '3C', '3A', '3F', '3I', '3K'],
+      'ABCEFHKL': ['3H', '3E', '3B', '3C', '3A', '3F', '3L', '3K'],
+      'ABCEFHJL': ['3H', '3J', '3B', '3C', '3A', '3F', '3L', '3E'],
+      'ABCEFHJK': ['3H', '3J', '3B', '3C', '3A', '3F', '3E', '3K'],
+      'ABCEFHIL': ['3H', '3E', '3B', '3C', '3A', '3F', '3L', '3I'],
+      'ABCEFHIK': ['3H', '3E', '3B', '3C', '3A', '3F', '3I', '3K'],
+      'ABCEFHIJ': ['3H', '3J', '3B', '3C', '3A', '3F', '3E', '3I'],
+      'ABCEFGKL': ['3E', '3G', '3B', '3C', '3A', '3F', '3L', '3K'],
+      'ABCEFGJL': ['3E', '3G', '3B', '3C', '3A', '3F', '3L', '3J'],
+      'ABCEFGJK': ['3E', '3G', '3B', '3C', '3A', '3F', '3J', '3K'],
+      'ABCEFGIL': ['3E', '3G', '3B', '3C', '3A', '3F', '3L', '3I'],
+      'ABCEFGIK': ['3E', '3G', '3B', '3C', '3A', '3F', '3I', '3K'],
+      'ABCEFGIJ': ['3E', '3G', '3B', '3C', '3A', '3F', '3I', '3J'],
+      'ABCEFGHL': ['3H', '3G', '3B', '3C', '3A', '3F', '3L', '3E'],
+      'ABCEFGHK': ['3H', '3G', '3B', '3C', '3A', '3F', '3E', '3K'],
+      'ABCEFGHJ': ['3H', '3G', '3B', '3C', '3A', '3F', '3E', '3J'],
+      'ABCEFGHI': ['3H', '3G', '3B', '3C', '3A', '3F', '3E', '3I'],
+      'ABCDHIJKL': ['3I', '3J', '3B', '3C', '3A', '3D', '3L', '3K'],
+      'ABCDHJKL': ['3H', '3J', '3B', '3C', '3A', '3D', '3L', '3K'],
+      'ABCDHIKL': ['3H', '3I', '3B', '3C', '3A', '3D', '3L', '3K'],
+      'ABCDHIJL': ['3H', '3J', '3B', '3C', '3A', '3D', '3L', '3I'],
+      'ABCDHIJK': ['3H', '3J', '3B', '3C', '3A', '3D', '3I', '3K'],
+      'ABCDGIJKL': ['3C', '3J', '3B', '3D', '3A', '3G', '3L', '3K'],
+      'ABCDGJKL': ['3C', '3J', '3B', '3D', '3A', '3G', '3L', '3K'],
+      'ABCDGHIJL': ['3C', '3J', '3B', '3D', '3A', '3G', '3L', '3I'],
+      'ABCDGHIJK': ['3C', '3J', '3B', '3D', '3A', '3G', '3I', '3K'],
+      'ABCDGHKL': ['3H', '3G', '3B', '3C', '3A', '3D', '3L', '3K'],
+      'ABCDGHJL': ['3H', '3G', '3B', '3C', '3A', '3D', '3L', '3J'],
+      'ABCDGHJK': ['3H', '3G', '3B', '3C', '3A', '3D', '3J', '3K'],
+      'ABCDGHIL': ['3H', '3G', '3B', '3C', '3A', '3D', '3L', '3I'],
+      'ABCDGHIK': ['3H', '3G', '3B', '3C', '3A', '3D', '3I', '3K'],
+      'ABCDGHIJ': ['3H', '3G', '3B', '3C', '3A', '3D', '3I', '3J'],
+      'ABCDFIJKL': ['3C', '3J', '3B', '3D', '3A', '3F', '3L', '3K'],
+      'ABCDFIKL': ['3C', '3I', '3B', '3D', '3A', '3F', '3L', '3K'],
+      'ABCDFIJL': ['3C', '3J', '3B', '3D', '3A', '3F', '3L', '3I'],
+      'ABCDFIJK': ['3C', '3J', '3B', '3D', '3A', '3F', '3I', '3K'],
+      'ABCDFHKL': ['3H', '3F', '3B', '3C', '3A', '3D', '3L', '3K'],
+      'ABCDFHJL': ['3C', '3J', '3B', '3D', '3A', '3F', '3L', '3H'],
+      'ABCDFHJK': ['3H', '3J', '3B', '3C', '3A', '3F', '3D', '3K'],
+      'ABCDFHIL': ['3H', '3F', '3B', '3C', '3A', '3D', '3L', '3I'],
+      'ABCDFHIK': ['3H', '3F', '3B', '3C', '3A', '3D', '3I', '3K'],
+      'ABCDFHIJ': ['3H', '3J', '3B', '3C', '3A', '3F', '3D', '3I'],
+      'ABCDFGKL': ['3C', '3G', '3B', '3D', '3A', '3F', '3L', '3K'],
+      'ABCDFGJL': ['3C', '3G', '3B', '3D', '3A', '3F', '3L', '3J'],
+      'ABCDFGJK': ['3C', '3G', '3B', '3D', '3A', '3F', '3J', '3K'],
+      'ABCDFGIL': ['3C', '3G', '3B', '3D', '3A', '3F', '3L', '3I'],
+      'ABCDFGIK': ['3C', '3G', '3B', '3D', '3A', '3F', '3I', '3K'],
+      'ABCDFGIJ': ['3C', '3G', '3B', '3D', '3A', '3F', '3I', '3J'],
+      'ABCDFGHL': ['3C', '3G', '3B', '3D', '3A', '3F', '3L', '3H'],
+      'ABCDFGHK': ['3H', '3G', '3B', '3C', '3A', '3F', '3D', '3K'],
+      'ABCDFGHJ': ['3H', '3G', '3B', '3C', '3A', '3F', '3D', '3J'],
+      'ABCDFGHI': ['3H', '3G', '3B', '3C', '3A', '3F', '3D', '3I'],
+      'ABCDEHIJKL': ['3E', '3J', '3B', '3C', '3A', '3D', '3L', '3K'],
+      'ABCDEHJKL': ['3H', '3J', '3B', '3C', '3A', '3D', '3L', '3E'],
+      'ABCDEHIJL': ['3H', '3J', '3B', '3C', '3A', '3D', '3L', '3I'],
+      'ABCDEHIJK': ['3H', '3J', '3B', '3C', '3A', '3D', '3E', '3K'],
+      'ABCDEHIKL': ['3H', '3E', '3B', '3C', '3A', '3D', '3L', '3K'],
+      'ABCDEGIJKL': ['3E', '3G', '3B', '3C', '3A', '3D', '3L', '3K'],
+      'ABCDEGJKL': ['3E', '3G', '3B', '3C', '3A', '3D', '3L', '3J'],
+      'ABCDEGHIJL': ['3E', '3G', '3B', '3C', '3A', '3D', '3L', '3I'],
+      'ABCDEGHIJK': ['3E', '3G', '3B', '3C', '3A', '3D', '3J', '3K'],
+      'ABCDEGHKL': ['3H', '3G', '3B', '3C', '3A', '3D', '3L', '3E'],
+      'ABCDEGHJL': ['3H', '3G', '3B', '3C', '3A', '3D', '3L', '3E'],
+      'ABCDEGHJK': ['3H', '3G', '3B', '3C', '3A', '3D', '3E', '3J'],
+      'ABCDEGHIL': ['3H', '3G', '3B', '3C', '3A', '3D', '3L', '3E'],
+      'ABCDEGHIK': ['3H', '3G', '3B', '3C', '3A', '3D', '3E', '3K'],
+      'ABCDEGHIJ': ['3H', '3G', '3B', '3C', '3A', '3D', '3E', '3I'],
+      'ABCDEFIJKL': ['3C', '3E', '3B', '3D', '3A', '3F', '3L', '3K'],
+      'ABCDEFJL': ['3C', '3J', '3B', '3D', '3A', '3F', '3L', '3E'],
+      'ABCDEFJK': ['3C', '3J', '3B', '3D', '3A', '3F', '3E', '3K'],
+      'ABCDEFIL': ['3C', '3E', '3B', '3D', '3A', '3F', '3L', '3I'],
+      'ABCDEFIK': ['3C', '3E', '3B', '3D', '3A', '3F', '3I', '3K'],
+      'ABCDEFIJ': ['3C', '3J', '3B', '3D', '3A', '3F', '3E', '3I'],
+      'ABCDEFHL': ['3H', '3F', '3B', '3C', '3A', '3D', '3L', '3E'],
+      'ABCDEFHK': ['3H', '3E', '3B', '3C', '3A', '3F', '3D', '3K'],
+      'ABCDEFHJ': ['3H', '3J', '3B', '3C', '3A', '3F', '3D', '3E'],
+      'ABCDEFHI': ['3H', '3E', '3B', '3C', '3A', '3F', '3D', '3I'],
+      'ABCDEFGL': ['3C', '3G', '3B', '3D', '3A', '3F', '3L', '3E'],
+      'ABCDEFGK': ['3C', '3G', '3B', '3D', '3A', '3F', '3E', '3K'],
+      'ABCDEFGJ': ['3C', '3G', '3B', '3D', '3A', '3F', '3E', '3J'],
+      'ABCDEFGI': ['3C', '3G', '3B', '3D', '3A', '3F', '3E', '3I'],
+      'ABCDEFGH': ['3H', '3G', '3B', '3C', '3A', '3F', '3D', '3E'],
+    };
+
+    function calcularPosiciones(letra) {
+      const grupo = GRUPOS[letra];
+
+      const equipos = grupo.equipos.map(function (nombre, i) {
+        return {
+          nombre: nombre,
+          bandera: grupo.banderas[i],
+          indice: i,
+          pts: 0, j: 0, g: 0, e: 0, p: 0, gf: 0, gc: 0
+        };
+      });
+
+      // Guardar resultado de cada partido para head-to-head
+      const resultados = {};
+      PARTIDOS.forEach(function ([hi, ai], mi) {
+        const inputH = document.getElementById('score-' + letra + '-' + mi + '-h');
+        const inputA = document.getElementById('score-' + letra + '-' + mi + '-a');
+        const golesH = parseInt(inputH.value);
+        const golesA = parseInt(inputA.value);
+
+        if (isNaN(golesH) || isNaN(golesA)) return;
+
+        // Guardar el resultado del partido para consulta head-to-head
+        resultados[hi + '-' + ai] = { golesH, golesA };
+
+        equipos[hi].j++; equipos[ai].j++;
+        equipos[hi].gf += golesH; equipos[hi].gc += golesA;
+        equipos[ai].gf += golesA; equipos[ai].gc += golesH;
+
+        if (golesH > golesA) {
+          equipos[hi].pts += 3; equipos[hi].g++; equipos[ai].p++;
+        } else if (golesA > golesH) {
+          equipos[ai].pts += 3; equipos[ai].g++; equipos[hi].p++;
+        } else {
+          equipos[hi].pts += 1; equipos[hi].e++;
+          equipos[ai].pts += 1; equipos[ai].e++;
+        }
+      });
+
+      // Función head-to-head: calcula stats solo entre un subgrupo de equipos
+      function headToHead(grupo) {
+        const indices = grupo.map(e => e.indice);
+        const stats = {};
+        indices.forEach(i => stats[i] = { pts: 0, gf: 0, gc: 0 });
+
+        indices.forEach(function (hi) {
+          indices.forEach(function (ai) {
+            if (hi === ai) return;
+            const clave = hi + '-' + ai;
+            if (!resultados[clave]) return;
+            const { golesH, golesA } = resultados[clave];
+
+            stats[hi].gf += golesH; stats[hi].gc += golesA;
+            stats[ai].gf += golesA; stats[ai].gc += golesH;
+
+            if (golesH > golesA) {
+              stats[hi].pts += 3;
+            } else if (golesA > golesH) {
+              stats[ai].pts += 3;
+            } else {
+              stats[hi].pts += 1;
+              stats[ai].pts += 1;
+            }
+          });
+        });
+        return stats;
+      }
+
+      // Ordenar con todos los criterios
+      equipos.sort(function (a, b) {
+        // Primero por puntos generales
+        if (b.pts !== a.pts) return b.pts - a.pts;
+
+        // Empate en puntos: aplicar head-to-head entre los empatados
+        const hth = headToHead([a, b]);
+        const ptsA = hth[a.indice].pts;
+        const ptsB = hth[b.indice].pts;
+
+        // a) Puntos head-to-head
+        if (ptsB !== ptsA) return ptsB - ptsA;
+
+        // b) DG head-to-head
+        const dgHthA = hth[a.indice].gf - hth[a.indice].gc;
+        const dgHthB = hth[b.indice].gf - hth[b.indice].gc;
+        if (dgHthB !== dgHthA) return dgHthB - dgHthA;
+
+        // c) GF head-to-head
+        if (hth[b.indice].gf !== hth[a.indice].gf) return hth[b.indice].gf - hth[a.indice].gf;
+
+        // d) DG general
+        const dgA = a.gf - a.gc;
+        const dgB = b.gf - b.gc;
+        if (dgB !== dgA) return dgB - dgA;
+
+        // e) GF general
+        if (b.gf !== a.gf) return b.gf - a.gf;
+
+        // Sin resolver - empate técnico
+        return 0;
+      });
+
+      return equipos;
+    }
+
+    function actualizarTabla(letra) {
+      const equipos = calcularPosiciones(letra);
+      const tbody = document.querySelector('#tabla-' + letra);
+
+      // Limpiar el tbody completamente
+      tbody.innerHTML = '';
+
+      // Reconstruir las filas en el nuevo orden
+      equipos.forEach(function (equipo, pos) {
+        const dg = equipo.gf - equipo.gc;
+        const dgTexto = dg > 0 ? '+' + dg : dg;
+
+        const fila = document.createElement('tr');
+        fila.id = 'fila-' + letra + '-' + equipo.indice;
+
+        // Color según posición
+        if (pos === 0 || pos === 1) {
+          fila.style.backgroundColor = '#d4edda'; // verde - clasifican directo
+        } else if (pos === 2) {
+          fila.style.backgroundColor = '#fff3cd'; // amarillo - posible mejor tercero
+        }
+
+        fila.innerHTML = `
+      <td>${pos + 1}</td>
+      <td>${equipo.bandera} ${equipo.nombre}</td>
+      <td>${equipo.j}</td>
+      <td>${equipo.g}</td>
+      <td>${equipo.e}</td>
+      <td>${equipo.p}</td>
+      <td>${equipo.gf}</td>
+      <td>${equipo.gc}</td>
+      <td>${dgTexto}</td>
+      <td><strong>${equipo.pts}</strong></td>
+    `;
+
+        tbody.appendChild(fila);
+      });
+    }
+
+    function actualizarTerceros() {
+      const terceros = [];
+
+      Object.keys(GRUPOS).forEach(function (letra) {
+        const equipos = calcularPosiciones(letra);
+        const tercero = equipos[2];
+        tercero.grupo = letra;
+        terceros.push(tercero);
+      });
+
+      terceros.sort(function (a, b) {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        const dgA = a.gf - a.gc;
+        const dgB = b.gf - b.gc;
+        if (dgB !== dgA) return dgB - dgA;
+        return b.gf - a.gf;
+      });
+
+      const tbody = document.getElementById('tabla-terceros');
+      tbody.innerHTML = '';
+
+      terceros.forEach(function (equipo, pos) {
+        const dg = equipo.gf - equipo.gc;
+        const dgTexto = dg > 0 ? '+' + dg : dg;
+        const clasifica = pos < 8;
+
+        const fila = document.createElement('tr');
+        if (clasifica) {
+          fila.style.backgroundColor = '#d4edda';
+        }
+
+        fila.innerHTML = `
+      <td>${pos + 1}</td>
+      <td>${equipo.bandera} ${equipo.nombre}</td>
+      <td>${equipo.grupo}</td>
+      <td><strong>${equipo.pts}</strong></td>
+      <td>${equipo.j}</td>
+      <td>${equipo.g}</td>
+      <td>${equipo.e}</td>
+      <td>${equipo.p}</td>
+      <td>${equipo.gf}</td>
+      <td>${equipo.gc}</td>
+      <td>${dgTexto}</td>
+      <td>${clasifica ? '✅ Clasifica' : '❌ Eliminado'}</td>
+    `;
+
+        tbody.appendChild(fila);
+      });
+      // Mostrar rival en tabla de terceros
+      const cruces = obtenerCrucesConTerceros();
+      // cruces = [1A,1B,1D,1E,1G,1I,1K,1L] en ese orden
+      const primeros = ['1A', '1B', '1D', '1E', '1G', '1I', '1K', '1L'];
+
+      if (cruces) {
+        const filas = document.querySelectorAll('#tabla-terceros tr');
+        filas.forEach(function (fila, i) {
+          if (i >= 8) return;
+          const grupo = terceros[i].grupo;
+          const posEnCruces = cruces.indexOf('3' + grupo);
+          if (posEnCruces !== -1) {
+            const rival = primeros[posEnCruces];
+            const ultima = fila.querySelector('td:last-child');
+            if (ultima) ultima.textContent = 'vs ' + rival;
+          }
+        });
+      }
+    }
+
+    function obtenerCrucesConTerceros() {
+      const terceros = [];
+      Object.keys(GRUPOS).forEach(function (letra) {
+        const equipos = calcularPosiciones(letra);
+        const tercero = equipos[2];
+        tercero.grupo = letra;
+        terceros.push(tercero);
+      });
+
+      terceros.sort(function (a, b) {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        const dgA = a.gf - a.gc;
+        const dgB = b.gf - b.gc;
+        if (dgB !== dgA) return dgB - dgA;
+        return b.gf - a.gf;
+      });
+
+      const top8 = terceros.slice(0, 8);
+      const clave = top8.map(e => e.grupo).sort().join('');
+      return TABLA_TERCEROS[clave] || null;
+    }
+
+    function renderizarGrupos() {
+      const contenedor = document.getElementById('grupos-container');
+      contenedor.innerHTML = '';
+
+      Object.keys(GRUPOS).forEach(function (letra) {
+        const grupo = GRUPOS[letra];
+
+        // Bloque completo del grupo
+        const bloque = document.createElement('div');
+        bloque.className = 'grupo-bloque';
+
+        // Título
+        const titulo = document.createElement('h2');
+        titulo.textContent = 'Grupo ' + letra;
+        bloque.appendChild(titulo);
+
+        // Contenedor interno (tabla + partidos lado a lado)
+        const contenido = document.createElement('div');
+        contenido.className = 'grupo-contenido';
+
+        // --- Tabla de posiciones ---
+        const tabla = document.createElement('table');
+        tabla.innerHTML = `
+      <thead>
+        <tr><th>#</th><th>Equipo</th><th>J</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr>
+      </thead>
+      <tbody id="tabla-${letra}"></tbody>
+    `;
+        contenido.appendChild(tabla);
+
+        const tbody = document.getElementById ? tabla.querySelector('tbody') : null;
+        grupo.equipos.forEach(function (equipo, i) {
+          const fila = document.createElement('tr');
+          fila.id = `fila-${letra}-${i}`;
+          fila.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${grupo.banderas[i]} ${equipo}</td>
+        <td>0</td><td>0</td><td>0</td><td>0</td>
+        <td>0</td><td>0</td><td>0</td><td>0</td>
+      `;
+          tabla.querySelector('tbody').appendChild(fila);
+        });
+
+        // --- Lista de partidos ---
+        const partidosDiv = document.createElement('div');
+        partidosDiv.className = 'partidos-lista';
+
+        PARTIDOS.forEach(function ([hi, ai], mi) {
+          const fila = document.createElement('div');
+          fila.className = 'partido-fila';
+          fila.innerHTML = `
+        <span class="partido-equipo">${grupo.banderas[hi]} ${grupo.equipos[hi]}</span>
+        <input class="partido-score" type="number" min="0" max="99" 
+               id="score-${letra}-${mi}-h" placeholder="-">
+        <span class="partido-sep">:</span>
+        <input class="partido-score" type="number" min="0" max="99" 
+               id="score-${letra}-${mi}-a" placeholder="-">
+        <span class="partido-equipo visitante">${grupo.banderas[ai]} ${grupo.equipos[ai]}</span>
+      `;
+          partidosDiv.appendChild(fila);
+          fila.querySelectorAll('input').forEach(function (input) {
+            input.addEventListener('input', function () {
+              actualizarTabla(letra);
+              actualizarTerceros();
+              verificarCompleto();
+              guardarEstado();
+            });
+          });
+        });
+
+        contenido.appendChild(partidosDiv);
+        bloque.appendChild(contenido);
+        contenedor.appendChild(bloque);
+      });
+    }
+
+    function reiniciar() {
+      if (!confirm('¿Seguro que quieres reiniciar todos los resultados?')) return;
+      localStorage.removeItem('mundial2026-grupos');
+      localStorage.removeItem('mundial2026-eliminatorias');
+
+      // Limpiar todos los inputs
+      document.querySelectorAll('.partido-score').forEach(function (input) {
+        input.value = '';
+      });
+
+      // Recalcular todo en cero
+      Object.keys(GRUPOS).forEach(function (letra) {
+        actualizarTabla(letra);
+      });
+      actualizarTerceros();
+      verificarCompleto();
+    }
+
+    function verificarCompleto() {
+      let total = 0;
+      let llenos = 0;
+
+      Object.keys(GRUPOS).forEach(function (letra) {
+        PARTIDOS.forEach(function (par, mi) {
+          const inputH = document.getElementById('score-' + letra + '-' + mi + '-h');
+          const inputA = document.getElementById('score-' + letra + '-' + mi + '-a');
+          total += 2;
+          if (inputH && inputH.value !== '') llenos++;
+          if (inputA && inputA.value !== '') llenos++;
+        });
+      });
+
+      const btn = document.getElementById('btn-siguiente');
+      if (llenos >= total) {
+        btn.removeAttribute('disabled');
+        btn.style.backgroundColor = '#27ae60';
+        btn.style.cursor = 'pointer';
+        btn.style.opacity = '1';
+      } else {
+        btn.setAttribute('disabled', 'disabled');
+        btn.style.backgroundColor = '#aaa';
+        btn.style.cursor = 'not-allowed';
+        btn.style.opacity = '0.6';
+      }
+    }
+
+    function siguienteRonda(restaurar) {
+      document.getElementById('grupos-container').style.display = 'none';
+      document.getElementById('terceros-section').style.display = 'none';
+      document.getElementById('controles').style.display = 'none';
+      document.getElementById('eliminatorias-section').style.display = 'block';
+
+      if (restaurar) {
+        // Solo renderizar con el estado guardado
+        renderizarBracket(
+          ['I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8'].map(function (id) { return { id: id }; }),
+          ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8'].map(function (id) { return { id: id }; })
+        );
+      } else {
+        construirBracket();
+      }
+
+      guardarEstado();
+    }
+
+    function regresarGrupos() {
+      document.getElementById('grupos-container').style.display = 'grid';
+      document.getElementById('terceros-section').style.display = 'block';
+      document.getElementById('controles').style.display = 'flex';
+      document.getElementById('eliminatorias-section').style.display = 'none';
+    }
+
+    function obtenerClasificados() {
+      const clasificados = {};
+
+      // Primeros y segundos de cada grupo
+      Object.keys(GRUPOS).forEach(function (letra) {
+        const equipos = calcularPosiciones(letra);
+        clasificados['1' + letra] = equipos[0];
+        clasificados['2' + letra] = equipos[1];
+      });
+
+      // Terceros clasificados
+      const terceros = [];
+      Object.keys(GRUPOS).forEach(function (letra) {
+        const equipos = calcularPosiciones(letra);
+        const tercero = equipos[2];
+        tercero.grupo = letra;
+        terceros.push(tercero);
+      });
+      terceros.sort(function (a, b) {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        const dgA = a.gf - a.gc;
+        const dgB = b.gf - b.gc;
+        if (dgB !== dgA) return dgB - dgA;
+        return b.gf - a.gf;
+      });
+      terceros.slice(0, 8).forEach(function (t) {
+        clasificados['3' + t.grupo] = t;
+      });
+
+      return clasificados;
+    }
+
+    // Estado global de la eliminatoria
+    let estadoEliminatoria = {};
+
+    function construirBracket() {
+      estadoEliminatoria = {};
+      const clasificados = obtenerClasificados();
+      const cruces = obtenerCrucesConTerceros();
+
+      // Definir los 16 cruces de R32
+      // Mitad izquierda (8 cruces)
+      const r32Izq = [
+        { id: 'I1', local: '1E', visitante: cruces ? cruces[3] : '3?' },
+        { id: 'I2', local: '1I', visitante: cruces ? cruces[5] : '3?' },
+        { id: 'I3', local: '2A', visitante: '2B' },
+        { id: 'I4', local: '1F', visitante: '2C' },
+        { id: 'I5', local: '2K', visitante: '2L' },
+        { id: 'I6', local: '1H', visitante: '2J' },
+        { id: 'I7', local: '1D', visitante: cruces ? cruces[2] : '3?' },
+        { id: 'I8', local: '1G', visitante: cruces ? cruces[4] : '3?' },
+      ];
+
+      // Mitad derecha (8 cruces)
+      const r32Der = [
+        { id: 'D1', local: '1C', visitante: '2F' },
+        { id: 'D2', local: '2E', visitante: '2I' },
+        { id: 'D3', local: '1A', visitante: cruces ? cruces[0] : '3?' },
+        { id: 'D4', local: '1L', visitante: cruces ? cruces[7] : '3?' },
+        { id: 'D5', local: '1J', visitante: '2H' },
+        { id: 'D6', local: '2D', visitante: '2G' },
+        { id: 'D7', local: '1B', visitante: cruces ? cruces[1] : '3?' },
+        { id: 'D8', local: '1K', visitante: cruces ? cruces[6] : '3?' },
+      ];
+
+      // Inicializar estado con equipos reales
+      function iniciarCruce(cruce) {
+        const equipoL = clasificados[cruce.local];
+        const equipoV = clasificados[cruce.visitante];
+        estadoEliminatoria[cruce.id] = {
+          equipoL: equipoL ? equipoL.bandera + ' ' + equipoL.nombre : cruce.local,
+          equipoV: equipoV ? equipoV.bandera + ' ' + equipoV.nombre : cruce.visitante,
+          golL: '', golV: '', ganador: null
+        };
+      }
+
+      r32Izq.forEach(iniciarCruce);
+      r32Der.forEach(iniciarCruce);
+
+      // Cruces de octavos (ganadores de R32)
+      // Izquierda: I1vsI2, I3vsI4, I5vsI6, I7vsI8
+      ['OI1', 'OI2', 'OI3', 'OI4', 'OD1', 'OD2', 'OD3', 'OD4'].forEach(function (id) {
+        estadoEliminatoria[id] = { equipoL: '?', equipoV: '?', golL: '', golV: '', ganador: null };
+      });
+      // Cuartos
+      ['QI1', 'QI2', 'QD1', 'QD2'].forEach(function (id) {
+        estadoEliminatoria[id] = { equipoL: '?', equipoV: '?', golL: '', golV: '', ganador: null };
+      });
+      // Semis
+      ['SI', 'SD'].forEach(function (id) {
+        estadoEliminatoria[id] = { equipoL: '?', equipoV: '?', golL: '', golV: '', ganador: null };
+      });
+      // Tercer lugar y Final
+      ['3ER', 'FIN'].forEach(function (id) {
+        estadoEliminatoria[id] = { equipoL: '?', equipoV: '?', golL: '', golV: '', ganador: null };
+      });
+
+      renderizarBracket(r32Izq, r32Der);
+    }
+
+    function nombreEquipo(id) {
+      return estadoEliminatoria[id] ? estadoEliminatoria[id].equipoL || '?' : '?';
+    }
+
+    function renderizarBracket(r32Izq, r32Der) {
+      const contenedor = document.getElementById('bracket-container');
+      contenedor.innerHTML = '';
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'bracket-rondas';
+
+      // MITAD IZQUIERDA
+      const mitadIzq = document.createElement('div');
+      mitadIzq.className = 'bracket-mitad';
+
+      // R32 izquierda
+      const colR32Izq = crearColumnaRonda('R32', r32Izq.map(c => c.id));
+      // Octavos izquierda
+      const colO8Izq = crearColumnaRonda('Octavos', ['OI1', 'OI2', 'OI3', 'OI4']);
+      // Cuartos izquierda
+      const colQ4Izq = crearColumnaRonda('Cuartos', ['QI1', 'QI2']);
+      // Semis izquierda
+      const colSIzq = crearColumnaRonda('Semis', ['SI']);
+
+      mitadIzq.appendChild(colR32Izq);
+      mitadIzq.appendChild(colO8Izq);
+      mitadIzq.appendChild(colQ4Izq);
+      mitadIzq.appendChild(colSIzq);
+
+      // CENTRO (Final + 3er lugar)
+      const centro = document.createElement('div');
+      centro.className = 'bracket-final';
+
+      const cardFinal = document.createElement('div');
+      cardFinal.className = 'final-card';
+      cardFinal.id = 'card-FIN';
+      cardFinal.innerHTML = `
+  <div class="final-titulo">🏆 FINAL</div>
+  ${crearCruceHTML('FIN')}
+  
+`;
+
+      const card3er = document.createElement('div');
+      card3er.className = 'final-card';
+      card3er.id = 'card-3ER';
+      card3er.innerHTML = `
+  <div class="final-titulo tercer-titulo">🥉 3er lugar</div>
+  ${crearCruceHTML('3ER')}
+`;
+
+      centro.appendChild(cardFinal);
+      centro.appendChild(card3er);
+
+      // MITAD DERECHA
+      const mitadDer = document.createElement('div');
+      mitadDer.className = 'bracket-mitad derecha';
+
+      const colR32Der = crearColumnaRonda('R32', r32Der.map(c => c.id));
+      const colO8Der = crearColumnaRonda('Octavos', ['OD1', 'OD2', 'OD3', 'OD4']);
+      const colQ4Der = crearColumnaRonda('Cuartos', ['QD1', 'QD2']);
+      const colSDer = crearColumnaRonda('Semis', ['SD']);
+
+      mitadDer.appendChild(colR32Der);
+      mitadDer.appendChild(colO8Der);
+      mitadDer.appendChild(colQ4Der);
+      mitadDer.appendChild(colSDer);
+
+      wrapper.appendChild(mitadIzq);
+      wrapper.appendChild(centro);
+      wrapper.appendChild(mitadDer);
+      contenedor.appendChild(wrapper);
+
+      // Agregar eventos
+      contenedor.querySelectorAll('.cruce-input').forEach(function (input) {
+        input.addEventListener('input', function () {
+          const id = this.dataset.id;
+          const lado = this.dataset.lado;
+          estadoEliminatoria[id]['gol' + lado] = this.value;
+          evaluarResultado(id);
+          guardarEstado();
+        });
+      });
+
+      contenedor.querySelectorAll('.penal-check').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          const id = this.dataset.id;
+          const lado = this.dataset.lado;
+          // Desmarcar el otro
+          const otro = lado === 'L' ? 'V' : 'L';
+          const otroCheck = contenedor.querySelector(
+            `.penal-check[data-id="${id}"][data-lado="${otro}"]`
+          );
+          if (otroCheck) otroCheck.checked = false;
+          evaluarResultado(id);
+        });
+      });
+      actualizarBloqueos();
+    }
+
+    function crearColumnaRonda(titulo, ids) {
+      const col = document.createElement('div');
+      col.className = 'ronda-col';
+
+      const t = document.createElement('div');
+      t.className = 'ronda-titulo';
+      t.textContent = titulo;
+      col.appendChild(t);
+
+      ids.forEach(function (id) {
+        const card = document.createElement('div');
+        card.className = 'cruce-card';
+        card.id = 'card-' + id;
+        card.innerHTML = crearCruceHTML(id);
+        col.appendChild(card);
+      });
+
+      return col;
+    }
+
+    function crearCruceHTML(id) {
+      const e = estadoEliminatoria[id];
+      if (!e) return '';
+      const ganadorL = e.ganador === 'L';
+      const ganadorV = e.ganador === 'V';
+
+      return `
+    <div class="cruce-linea ${ganadorL ? 'ganador' : ''}">
+      <span class="cruce-nombre" title="${e.equipoL}">${e.equipoL}</span>
+      <input class="cruce-input" type="number" min="0" max="99"
+             data-id="${id}" data-lado="L"
+             value="${e.golL}" placeholder="-">
+    </div>
+    <div class="cruce-linea ${ganadorV ? 'ganador' : ''}">
+      <span class="cruce-nombre" title="${e.equipoV}">${e.equipoV}</span>
+      <input class="cruce-input" type="number" min="0" max="99"
+             data-id="${id}" data-lado="V"
+             value="${e.golV}" placeholder="-">
+    </div>
+    <div class="penales-row ${(e.golL !== '' && e.golV !== '' && e.golL === e.golV) ? 'visible' : ''}" id="penales-${id}">
+      <span>Penales:</span>
+      <label class="penales-check">
+        <input type="checkbox" class="penal-check"
+               data-id="${id}" data-lado="L"
+               ${e.ganador === 'L' && e.golL === e.golV ? 'checked' : ''}>
+        Local
+      </label>
+      <label class="penales-check">
+        <input type="checkbox" class="penal-check"
+               data-id="${id}" data-lado="V"
+               ${e.ganador === 'V' && e.golL === e.golV ? 'checked' : ''}>
+        Visit.
+      </label>
+    </div>
+  `;
+    }
+
+    function evaluarResultado(id) {
+      const e = estadoEliminatoria[id];
+      const gL = parseInt(e.golL);
+      const gV = parseInt(e.golV);
+
+      if (isNaN(gL) || isNaN(gV)) {
+        e.ganador = null;
+        actualizarProgresion(id, null);
+        rerenderCard(id);
+        return;
+      }
+
+      // Mostrar/ocultar penales
+      const penalesRow = document.getElementById('penales-' + id);
+      if (penalesRow) {
+        if (gL === gV) {
+          penalesRow.classList.add('visible');
+        } else {
+          penalesRow.classList.remove('visible');
+        }
+      }
+
+      if (gL > gV) {
+        e.ganador = 'L';
+      } else if (gV > gL) {
+        e.ganador = 'V';
+      } else {
+        // Empate — ver penales
+        const checkL = document.querySelector(`.penal-check[data-id="${id}"][data-lado="L"]`);
+        const checkV = document.querySelector(`.penal-check[data-id="${id}"][data-lado="V"]`);
+        if (checkL && checkL.checked) e.ganador = 'L';
+        else if (checkV && checkV.checked) e.ganador = 'V';
+        else e.ganador = null;
+      }
+
+      rerenderCard(id);
+      actualizarProgresion(id, e.ganador ? (e.ganador === 'L' ? e.equipoL : e.equipoV) : null);
+    }
+
+    function rerenderCard(id) {
+  const card = document.getElementById('card-' + id);
+  if (!card) return;
+  const e = estadoEliminatoria[id];
+
+  const inputL = card.querySelector('[data-lado="L"]');
+  const inputV = card.querySelector('[data-lado="V"]');
+  const lineaL = card.querySelectorAll('.cruce-linea')[0];
+  const lineaV = card.querySelectorAll('.cruce-linea')[1];
+  const nombreL = card.querySelectorAll('.cruce-nombre')[0];
+  const nombreV = card.querySelectorAll('.cruce-nombre')[1];
+  const penalesRow = card.querySelector('.penales-row');
+
+  // Actualizar nombres (por si vienen de progresión)
+  if (nombreL) {
+    nombreL.textContent = e.equipoL;
+    nombreL.title = e.equipoL;
+  }
+  if (nombreV) {
+    nombreV.textContent = e.equipoV;
+    nombreV.title = e.equipoV;
+  }
+
+  // Actualizar valores de los inputs SOLO si difieren (evita perder el cursor)
+  if (inputL && inputL.value !== e.golL) inputL.value = e.golL;
+  if (inputV && inputV.value !== e.golV) inputV.value = e.golV;
+
+  // Actualizar colores de ganador
+  if (lineaL) lineaL.classList.toggle('ganador', e.ganador === 'L');
+  if (lineaV) lineaV.classList.toggle('ganador', e.ganador === 'V');
+
+  // Mostrar/ocultar fila de penales
+  if (penalesRow) {
+    const empate = e.golL !== '' && e.golV !== '' && e.golL === e.golV;
+    penalesRow.classList.toggle('visible', empate);
+
+    const checkL = penalesRow.querySelector('[data-lado="L"]');
+    const checkV = penalesRow.querySelector('[data-lado="V"]');
+    if (checkL) checkL.checked = (e.ganador === 'L' && empate);
+    if (checkV) checkV.checked = (e.ganador === 'V' && empate);
+  }
+}
+
+    // Mapa de progresión: qué cruce alimenta a cuál y en qué posición
+    const PROGRESION = {
+      'I1': { siguiente: 'OI1', pos: 'L' },
+      'I2': { siguiente: 'OI1', pos: 'V' },
+      'I3': { siguiente: 'OI2', pos: 'L' },
+      'I4': { siguiente: 'OI2', pos: 'V' },
+      'I5': { siguiente: 'OI3', pos: 'L' },
+      'I6': { siguiente: 'OI3', pos: 'V' },
+      'I7': { siguiente: 'OI4', pos: 'L' },
+      'I8': { siguiente: 'OI4', pos: 'V' },
+      'OI1': { siguiente: 'QI1', pos: 'L' },
+      'OI2': { siguiente: 'QI1', pos: 'V' },
+      'OI3': { siguiente: 'QI2', pos: 'L' },
+      'OI4': { siguiente: 'QI2', pos: 'V' },
+      'QI1': { siguiente: 'SI', pos: 'L' },
+      'QI2': { siguiente: 'SI', pos: 'V' },
+      'SI': { siguiente: 'FIN', pos: 'L', perdedor: '3ER', perdedorPos: 'L' },
+      'D1': { siguiente: 'OD1', pos: 'L' },
+      'D2': { siguiente: 'OD1', pos: 'V' },
+      'D3': { siguiente: 'OD2', pos: 'L' },
+      'D4': { siguiente: 'OD2', pos: 'V' },
+      'D5': { siguiente: 'OD3', pos: 'L' },
+      'D6': { siguiente: 'OD3', pos: 'V' },
+      'D7': { siguiente: 'OD4', pos: 'L' },
+      'D8': { siguiente: 'OD4', pos: 'V' },
+      'OD1': { siguiente: 'QD1', pos: 'L' },
+      'OD2': { siguiente: 'QD1', pos: 'V' },
+      'OD3': { siguiente: 'QD2', pos: 'L' },
+      'OD4': { siguiente: 'QD2', pos: 'V' },
+      'QD1': { siguiente: 'SD', pos: 'L' },
+      'QD2': { siguiente: 'SD', pos: 'V' },
+      'SD': { siguiente: 'FIN', pos: 'V', perdedor: '3ER', perdedorPos: 'V' },
+    };
+
+    function actualizarProgresion(id, ganadorNombre) {
+      const prog = PROGRESION[id];
+      if (!prog) return;
+
+      const e = estadoEliminatoria[id];
+      const perdedorNombre = e.ganador === 'L' ? e.equipoV : e.equipoL;
+
+      // Actualizar ganador en siguiente ronda
+      const sig = estadoEliminatoria[prog.siguiente];
+      if (sig) {
+        if (prog.pos === 'L') {
+          sig.equipoL = ganadorNombre || '?';
+        } else {
+          sig.equipoV = ganadorNombre || '?';
+        }
+        sig.golL = '';
+        sig.golV = '';
+        sig.ganador = null;
+        rerenderCard(prog.siguiente);
+      }
+
+      // Actualizar perdedor en 3er lugar (semis)
+      if (prog.perdedor) {
+        const ter = estadoEliminatoria[prog.perdedor];
+        if (ter) {
+          if (prog.perdedorPos === 'L') {
+            ter.equipoL = ganadorNombre ? perdedorNombre : '?';
+          } else {
+            ter.equipoV = ganadorNombre ? perdedorNombre : '?';
+          }
+          ter.golL = '';
+          ter.golV = '';
+          ter.ganador = null;
+          rerenderCard(prog.perdedor);
+        }
+      }
+
+      // Bloquear/desbloquear rondas
+      actualizarBloqueos();
+    }
+
+    function actualizarBloqueos() {
+      // Orden de rondas por mitad
+      const rondasIzq = [
+        ['I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8'],
+        ['OI1', 'OI2', 'OI3', 'OI4'],
+        ['QI1', 'QI2'],
+        ['SI']
+      ];
+      const rondasDer = [
+        ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8'],
+        ['OD1', 'OD2', 'OD3', 'OD4'],
+        ['QD1', 'QD2'],
+        ['SD']
+      ];
+
+      function bloquearRonda(ids, bloqueado) {
+        ids.forEach(function (id) {
+          const card = document.getElementById('card-' + id);
+          if (!card) return;
+          card.querySelectorAll('.cruce-input').forEach(function (input) {
+            input.disabled = bloqueado;
+            input.style.backgroundColor = bloqueado ? '#eee' : 'white';
+            input.style.color = bloqueado ? '#aaa' : '#000';
+          });
+          card.querySelectorAll('.penal-check').forEach(function (cb) {
+            cb.disabled = bloqueado;
+          });
+        });
+      }
+
+      function rondaCompleta(ids) {
+        return ids.every(function (id) {
+          return estadoEliminatoria[id] && estadoEliminatoria[id].ganador !== null;
+        });
+      }
+
+      // Procesar mitad izquierda
+      for (let i = 0; i < rondasIzq.length; i++) {
+        const anterior = i === 0 ? null : rondasIzq[i - 1];
+        const actual = rondasIzq[i];
+        const bloqueado = anterior ? !rondaCompleta(anterior) : false;
+        bloquearRonda(actual, bloqueado);
+      }
+
+      // Procesar mitad derecha
+      for (let i = 0; i < rondasDer.length; i++) {
+        const anterior = i === 0 ? null : rondasDer[i - 1];
+        const actual = rondasDer[i];
+        const bloqueado = anterior ? !rondaCompleta(anterior) : false;
+        bloquearRonda(actual, bloqueado);
+      }
+
+      // Final y 3er lugar: bloqueados hasta que ambas semis estén completas
+      const semifinalesCompletas = rondaCompleta(['SI']) && rondaCompleta(['SD']);
+      const cardFin = document.getElementById('card-FIN');
+      const card3er = document.getElementById('card-3ER');
+
+      [cardFin, card3er].forEach(function (card) {
+        if (!card) return;
+        card.querySelectorAll('.cruce-input').forEach(function (input) {
+          input.disabled = !semifinalesCompletas;
+          input.style.backgroundColor = !semifinalesCompletas ? '#eee' : 'white';
+          input.style.color = !semifinalesCompletas ? '#aaa' : '#000';
+        });
+        card.querySelectorAll('.penal-check').forEach(function (cb) {
+          cb.disabled = !semifinalesCompletas;
+        });
+      });
+    }
+
+    function guardarEstado() {
+      const datos = {};
+      Object.keys(GRUPOS).forEach(function (letra) {
+        PARTIDOS.forEach(function (par, mi) {
+          const inputH = document.getElementById('score-' + letra + '-' + mi + '-h');
+          const inputA = document.getElementById('score-' + letra + '-' + mi + '-a');
+          if (inputH) datos['score-' + letra + '-' + mi + '-h'] = inputH.value;
+          if (inputA) datos['score-' + letra + '-' + mi + '-a'] = inputA.value;
+        });
+      });
+      localStorage.setItem('mundial2026-grupos', JSON.stringify(datos));
+
+      // Guardar también si estamos en eliminatorias
+      if (Object.keys(estadoEliminatoria).length > 0) {
+        localStorage.setItem('mundial2026-eliminatorias', JSON.stringify(estadoEliminatoria));
+      }
+    }
+
+    function restaurarEstado() {
+      const datosGrupos = localStorage.getItem('mundial2026-grupos');
+      if (!datosGrupos) return false;
+
+      const datos = JSON.parse(datosGrupos);
+      let hayDatos = false;
+
+      Object.keys(datos).forEach(function (id) {
+        const input = document.getElementById(id);
+        if (input && datos[id] !== '') {
+          input.value = datos[id];
+          hayDatos = true;
+        }
+      });
+
+      if (hayDatos) {
+        // Recalcular todas las tablas con los datos restaurados
+        Object.keys(GRUPOS).forEach(function (letra) {
+          actualizarTabla(letra);
+        });
+        actualizarTerceros();
+        verificarCompleto();
+      }
+
+      // Restaurar eliminatorias si estaban abiertas
+      const datosElim = localStorage.getItem('mundial2026-eliminatorias');
+      if (datosElim) {
+        const confirmado = confirm('Tienes una fase eliminatoria en progreso. ¿Quieres continuar desde donde dejaste?');
+        if (confirmado) {
+          estadoEliminatoria = JSON.parse(datosElim);
+          siguienteRonda(true); // true = restaurar sin recalcular
+        }
+      }
+
+      return hayDatos;
+    }
+
+    function capturarSeccion(tipo) {
+  const boton = tipo === 'grupos' 
+    ? document.getElementById('btn-captura-grupos')
+    : document.querySelector('#controles-eliminatorias .btn-captura-bracket');
+  
+  if (boton) {
+    boton.textContent = '⏳ Generando...';
+    boton.disabled = true;
+  }
+
+  if (tipo === 'grupos') {
+    const grupos = document.getElementById('grupos-container');
+    const terceros = document.getElementById('terceros-section');
+
+    // Guardar estilos originales
+    const estiloOriginalGrupos = grupos.style.cssText;
+    const estiloOriginalTerceros = terceros.style.cssText;
+
+    // Forzar 3 columnas y ancho fijo temporalmente
+    grupos.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    grupos.style.width = '1400px';
+
+    grupos.querySelectorAll('.grupo-contenido').forEach(function(gc) {
+      gc.style.gridTemplateColumns = '1fr 1fr';
+    });
+
+    terceros.style.width = '1400px';
+
+    setTimeout(function() {
+      html2canvas(document.body, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#f0f0f0',
+        x: grupos.getBoundingClientRect().left + window.scrollX,
+        y: grupos.getBoundingClientRect().top + window.scrollY,
+        width: 1400,
+        height: (terceros.getBoundingClientRect().bottom - grupos.getBoundingClientRect().top),
+        windowWidth: 1400
+      }).then(function(canvas) {
+        const link = document.createElement('a');
+        link.download = 'mundial2026-grupos.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        // Restaurar estilos
+        grupos.style.cssText = estiloOriginalGrupos;
+        terceros.style.cssText = estiloOriginalTerceros;
+        grupos.querySelectorAll('.grupo-contenido').forEach(function(gc) {
+          gc.style.gridTemplateColumns = '';
+        });
+
+        if (boton) {
+          boton.textContent = '📷 Capturar grupos';
+          boton.disabled = false;
+        }
+      });
+    }, 300);
+
+  } else if (tipo === 'bracket') {
+    const bracket = document.getElementById('bracket-container');
+    const wrapper = bracket.querySelector('.bracket-rondas');
+
+    const estiloOriginalBracket = bracket.style.cssText;
+    const anchoTotal = wrapper.scrollWidth;
+    const altoTotal = wrapper.scrollHeight;
+
+    // Forzar que se muestre todo sin scroll
+    bracket.style.overflow = 'visible';
+    bracket.style.width = anchoTotal + 'px';
+
+    setTimeout(function() {
+      html2canvas(document.body, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#f0f0f0',
+        x: bracket.getBoundingClientRect().left + window.scrollX,
+        y: bracket.getBoundingClientRect().top + window.scrollY,
+        width: anchoTotal,
+        height: altoTotal,
+        windowWidth: anchoTotal
+      }).then(function(canvas) {
+        const link = document.createElement('a');
+        link.download = 'mundial2026-bracket.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        bracket.style.cssText = estiloOriginalBracket;
+
+        if (boton) {
+          boton.textContent = '📷 Capturar bracket';
+          boton.disabled = false;
+        }
+      });
+    }, 300);
+  }
+}
+
+    renderizarGrupos();
+    actualizarTerceros();
+    verificarCompleto();
+    restaurarEstado();
+  </script>
+
+</body>
+
+</html>
